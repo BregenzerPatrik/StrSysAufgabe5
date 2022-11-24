@@ -1,7 +1,7 @@
 package org.example;
 
 
-public record PathData(String medallion, String hack_license, Long pickup_datetime, Long dropoff_datetime,
+public record PathData(String medallion, String hack_license, long pickup_datetime, long dropoff_datetime,
                        int trip_time_in_secs, double trip_distance_in_miles, double pickup_longitude,
                        double pickup_latitude, double dropoff_longitude, double dropoff_latitude, String payment_type,
                        double fare_amount, double surcharge, double mta_tax, double tip_amount, double tolls_amount,
@@ -11,8 +11,8 @@ public record PathData(String medallion, String hack_license, Long pickup_dateti
         String[] values = value.split(",");
         String medallion = values[0];
         String hack_license = values[1];
-        Long pickup_datetime = Long.parseLong(values[2]);
-        Long dropoff_datetime = Long.parseLong(values[3]);
+        long pickup_datetime = Long.parseLong(values[2]);
+        long dropoff_datetime = Long.parseLong(values[3]);
         int trip_time_in_secs = Integer.parseInt(values[4]);
         double trip_distance_in_miles = Double.parseDouble(values[5]);
         double pickup_longitude = Double.parseDouble(values[6]);

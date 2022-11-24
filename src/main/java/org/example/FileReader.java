@@ -21,9 +21,19 @@ public class FileReader {
                 String processedLine = processLine(line);
                 PathData data = PathData.createPathData(processedLine);
                 KafkaProducer.sendPathData(data);
+            }
 
+            Thread.sleep(3000);
+            Route[] mostUsedRoutes = PathDataStore.getMostUsedRoute();
+            int[] frequencies= PathDataStore.frequencies();
+            for( int i=0;i<mostUsedRoutes.length;i++){
+                System.out.println("mostUsedRoute: "+mostUsedRoutes[i]);
+                System.out.println("Frequenz: "+frequencies[i]);
+                System.out.println("---------------------");
             }
         } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

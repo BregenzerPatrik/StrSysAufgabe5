@@ -1,14 +1,14 @@
 package org.example;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class PathDataStore {
     private static final Map<Route, Integer> usedCells = new HashMap<>();
     private static long aktTimestamp = 0;
     private static final long intervallInMillis = 30 * 60 * 1000;
     private static LinkedList<PathData> currentlySavedCells = new LinkedList<>();
+
+    private static SortedSet<PathData> currentlySavedCells2 = new TreeSet<>();
 
     private static LinkedList<PathData> popList(long expierationTimestamp) {
         //removes elements that are older then 30 minutes form the Linked lists
@@ -48,17 +48,19 @@ public class PathDataStore {
     public static void add(PathData pathData) {
         if (pathData.dropoff_datetime() > aktTimestamp) {
             aktTimestamp = pathData.dropoff_datetime();
+            removeOldpathData();
         }
         if (!(pathData.dropoff_datetime() < aktTimestamp - intervallInMillis)) {
-            currentlySavedCells.add(pathData);
+            //if data is not to old (last 30 mins)
             Route route = new Route(
                     pathData.pickup_longitude(),
                     pathData.pickup_latitude(),
                     pathData.dropoff_longitude(),
                     pathData.dropoff_latitude());
-            addRoute(route);
-
-
+            if(route.isInsideGrid()) {
+                addElementToCurrentlySavedItemList(pathData);
+                addRoute(route);
+            }
         }
     }
 
@@ -71,4 +73,46 @@ public class PathDataStore {
             usedCells.put(route,1);
         }
     }
+    public static Route[] getMostUsedRoute(){
+
+        System.out.println("Correct Routes: "+usedCells.keySet().size());
+        for(Route route : usedCells.keySet()){
+            int frequency=usedCells.get(route).intValue();
+            TenRoutes.tryAddRoute(route,frequency);
+        }
+
+        return TenRoutes.getRoutes();
+    }
+    public static int[] frequencies(){
+        return TenRoutes.frequencies;
+    }
+    private class TenRoutes{
+
+
+        private static int[] frequencies = new int[10];
+        private static Route[] routes= new Route[10];
+
+        public static void tryAddRoute(Route route,int frequency){
+            int minFrequency= frequencies[0];
+            for(int i = 1; i<10;i++){
+                if(frequencies[i]<minFrequency){
+                    minFrequency= frequencies[i];
+                }
+            }
+            for(int i = 0; i<10;i++){
+                if(frequencies[i]<frequency && frequencies[i]==minFrequency){
+                    frequencies[i]=frequency;
+                    routes[i]=route;
+                    break;
+                }
+            }
+        }
+        public static int[] getFrequencies() {
+            return frequencies;
+        }
+        public static Route[] getRoutes() {
+            return routes;
+        }
+    }
 }
+

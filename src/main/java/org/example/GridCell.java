@@ -18,7 +18,7 @@ public class GridCell implements Comparable<GridCell>{
         return latitudeIndex;
     }
 
-    public GridCell(double longitude, double latitude) {
+    public GridCell(double latitude , double longitude) {
         // latitude=(latitudeIndex-1)*0.005986 +41.474937 east-west
         // latitude - 41.474937 = (latitudeIndex-1)*0.005986
         // (latitude - 41.474937)/0.005986 = latitudeIndex-1

@@ -24,7 +24,7 @@ public class KafkaProducer {
     }
 
 
-    public static void sendPathData(final PathData pathdata) {
+    public static void sendPathData(PathData pathdata) {
         try {
             Gson gson = new Gson();
             final ProducerRecord<String, String> record =

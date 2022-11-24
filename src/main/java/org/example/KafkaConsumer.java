@@ -44,10 +44,8 @@ public class KafkaConsumer implements Runnable {
             System.out.println("---Starte Consumer---");
             consumer.subscribe(topics);
             while (!shutdown.get()) {
-                System.out.println("checking for message");
                 Duration duration = Duration.ofMillis(500);
                 ConsumerRecords<String, String> records = consumer.poll(duration);
-
                 for (ConsumerRecord<String, String> record : records) {
                     System.out.println(record.value());
                     Gson gson = new Gson();
