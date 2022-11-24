@@ -47,7 +47,6 @@ public class KafkaConsumer implements Runnable {
                 Duration duration = Duration.ofMillis(500);
                 ConsumerRecords<String, String> records = consumer.poll(duration);
                 for (ConsumerRecord<String, String> record : records) {
-                    System.out.println(record.value());
                     Gson gson = new Gson();
                     PathDataStore.add(gson.fromJson(record.value(), PathData.class));
                 }

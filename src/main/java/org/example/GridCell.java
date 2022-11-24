@@ -27,7 +27,7 @@ public class GridCell implements Comparable<GridCell>{
         this.latitudeIndex = ((int) Math.round(latitudeOffset / degreeOffsetPerLatitudeCell)) + 1;
         // longitude=(longitudeIndex-1)*0.004491556 -74.913585 north-south
         double longitudeOffset = longitude - longitudeDegreeOfCenterCell;
-        this.longitudeIndex = ((int) Math.round(longitudeOffset / degreeOffsetPerLongitudeCell)) + 1;
+        this.longitudeIndex = -1*((int) Math.round(longitudeOffset / degreeOffsetPerLongitudeCell)) + 1;
     }
 
     @Override

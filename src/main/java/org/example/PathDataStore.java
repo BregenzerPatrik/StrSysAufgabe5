@@ -14,6 +14,9 @@ public class PathDataStore {
         //removes elements that are older then 30 minutes form the Linked lists
         //that tracks age and returns them.
         LinkedList<PathData> result = new LinkedList<>();
+        if (currentlySavedCells.size()==0){
+            return result;
+        }
         while (currentlySavedCells.getFirst().dropoff_datetime() < expierationTimestamp) {
             result.add(currentlySavedCells.removeFirst());
         }
@@ -21,7 +24,6 @@ public class PathDataStore {
     }
 
     private static void removeOldpathData(){
-
         LinkedList<PathData> popList = popList(aktTimestamp - intervallInMillis);
         for(PathData pathData:popList){
             Route route = new Route(
@@ -29,7 +31,7 @@ public class PathDataStore {
                     pathData.pickup_latitude(),
                     pathData.dropoff_longitude(),
                     pathData.dropoff_latitude());
-
+            decrementIndivdualRoute(route);
         }
     }
     private static void decrementIndivdualRoute(Route route){
@@ -45,8 +47,27 @@ public class PathDataStore {
         }
     }
 
+
+
+    private static void addElementToCurrentlySavedItemList(PathData pathData){
+        if (currentlySavedCells.size()==0){
+            currentlySavedCells= new LinkedList<PathData>();
+            currentlySavedCells.add(pathData);
+            return;
+        }
+        int i=0;
+        for(PathData savedData: currentlySavedCells){
+            if (savedData.dropoff_datetime()>pathData.dropoff_datetime()){
+                break;
+            }
+            i+=1;
+        }
+        currentlySavedCells.add(i,pathData);
+    }
+
     public static void add(PathData pathData) {
         if (pathData.dropoff_datetime() > aktTimestamp) {
+            //if has newest timestamp
             aktTimestamp = pathData.dropoff_datetime();
             removeOldpathData();
         }
