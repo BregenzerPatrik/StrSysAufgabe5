@@ -3,7 +3,7 @@ package org.example;
 import java.util.*;
 
 public class PathDataStore {
-    private static final Map<Route, Integer> usedCells = new HashMap<>();
+    private static final Map<Route, Integer> usedCells = new TreeMap<>();
     private static long aktTimestamp = 0;
     private static final long intervallInMillis = 30 * 60 * 1000;
     private static LinkedList<PathData> currentlySavedCells = new LinkedList<>();
