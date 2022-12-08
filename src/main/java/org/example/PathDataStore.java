@@ -1,13 +1,23 @@
 package org.example;
 import java.util.*;
+import java.time.LocalDateTime;
 
 public class PathDataStore {
     private static final Set<Route> usedCells = new TreeSet<>();
     private static long aktTimestamp = 0;
     private static final long intervallInMillis = 30 * 60 * 1000;
     private static LinkedList<PathData> currentlySavedCells = new LinkedList<>();
-
     private static SortedSet<PathData> currentlySavedCells2 = new TreeSet<>();
+    private static Route[] currentlyBestRoutes =getMostUsedRoute();
+
+    private static boolean checkIfBestRouteIsOutDated(Route[] newBest) {
+        for(int i = 0; i<10;++i){
+            if (newBest[i] != null)
+                if ( ! newBest[i].equals(currentlyBestRoutes[i]))
+                    return true;
+        }
+        return false;
+    }
 
     private static LinkedList<PathData> popList(long expierationTimestamp) {
         //removes elements that are older then 30 minutes form the Linked lists
@@ -17,6 +27,7 @@ public class PathDataStore {
             return result;
         }
         while (currentlySavedCells.getFirst().dropoff_datetime() < expierationTimestamp) {
+            //System.out.println("removing");
             result.add(currentlySavedCells.removeFirst());
         }
         return result;
@@ -66,7 +77,8 @@ public class PathDataStore {
         currentlySavedCells.add(i, pathData);
     }
 
-    public static void add(PathData pathData) {
+    public static void add(PathData pathData){
+        long timeOfArrival= LocalDateTime.now().getNano();
         if (pathData.dropoff_datetime() > aktTimestamp) {
             //if has newest timestamp
             aktTimestamp = pathData.dropoff_datetime();
@@ -82,8 +94,40 @@ public class PathDataStore {
             if (route.isInsideGrid()) {
                 addElementToCurrentlySavedItemList(pathData);
                 addRoute(route);
+                Route[] newMostUsedRoutes = getMostUsedRoute();
+
+                boolean needToReplaceBestList = checkIfBestRouteIsOutDated(newMostUsedRoutes);
+                if (needToReplaceBestList) {
+
+                   /* for(long i =0;i<1000L;++i){
+                        //int r = 100;
+                        System.out.print("_");
+                    }
+                    System.out.print("\n");*/
+
+                    long timeOfProcessingFinished=LocalDateTime.now().getNano();
+
+                    currentlyBestRoutes = newMostUsedRoutes;
+                    long timeNeeded=(timeOfProcessingFinished -timeOfArrival);//Kann 0 sein, weil sich LocalDateTime.now().getNano() sehr unregelmäßig aktualisiert
+                    printBestRouteString(pathData,timeNeeded);
+                }
             }
         }
+    }
+
+    private static void printBestRouteString(PathData pathData, long duration) {
+        String resultString = pathData.pickup_datetime() + " " +
+                pathData.dropoff_datetime() + " ";
+        int lenOfArray = currentlyBestRoutes.length;
+
+        for (int i = 0; i < lenOfArray; ++i) {
+            Route currentRoute = currentlyBestRoutes[i];
+            if (currentRoute == null)
+                resultString = resultString + " NULL NULL ";
+            else
+                resultString = resultString + currentRoute.getFrom() + " " + currentRoute.getTo() + " ";
+        }
+        System.out.println(resultString+ duration/1000000.0);//1000000.0
     }
 
     private static void addRoute(Route route) {

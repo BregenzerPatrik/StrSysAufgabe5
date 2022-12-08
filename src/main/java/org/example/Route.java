@@ -59,10 +59,7 @@ public class Route implements Comparable<Route> {
 
     @Override
     public String toString() {
-        return "Route{" + "\n" +
-                "from = " + from + "\n" +
-                "to = " + to + "\n" +
-                '}';
+        return "("+from+"/"+to+ ")";
     }
 
     public int getFrequency() {
