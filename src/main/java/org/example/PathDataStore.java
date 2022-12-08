@@ -1,9 +1,8 @@
 package org.example;
-
 import java.util.*;
 
 public class PathDataStore {
-    private static final Map<Route, Integer> usedCells = new TreeMap<>();
+    private static final Set<Route> usedCells = new TreeSet<>();
     private static long aktTimestamp = 0;
     private static final long intervallInMillis = 30 * 60 * 1000;
     private static LinkedList<PathData> currentlySavedCells = new LinkedList<>();
@@ -14,7 +13,7 @@ public class PathDataStore {
         //removes elements that are older then 30 minutes form the Linked lists
         //that tracks age and returns them.
         LinkedList<PathData> result = new LinkedList<>();
-        if (currentlySavedCells.size()==0){
+        if (currentlySavedCells.size() == 0) {
             return result;
         }
         while (currentlySavedCells.getFirst().dropoff_datetime() < expierationTimestamp) {
@@ -23,9 +22,9 @@ public class PathDataStore {
         return result;
     }
 
-    private static void removeOldpathData(){
+    private static void removeOldpathData() {
         LinkedList<PathData> popList = popList(aktTimestamp - intervallInMillis);
-        for(PathData pathData:popList){
+        for (PathData pathData : popList) {
             Route route = new Route(
                     pathData.pickup_longitude(),
                     pathData.pickup_latitude(),
@@ -34,35 +33,37 @@ public class PathDataStore {
             decrementIndivdualRoute(route);
         }
     }
-    private static void decrementIndivdualRoute(Route route){
-        if(usedCells.containsKey(route)){
-            if(usedCells.get(route)==1){
-                usedCells.remove(route);
+
+    private static void decrementIndivdualRoute(Route route) {
+        int frequency=0;
+        for(Route r:usedCells) {
+            if(r.equals(route)){
+                frequency=r.getFrequency();
+                usedCells.remove(r);
+                break;
             }
-            else {
-                int frequency= usedCells.get(route);
-                usedCells.remove(route);
-                usedCells.put(route,frequency-1);
-            }
+        }
+        if(frequency>1){
+            route.setFrequency(frequency-1);
+            usedCells.add(route);
         }
     }
 
 
-
-    private static void addElementToCurrentlySavedItemList(PathData pathData){
-        if (currentlySavedCells.size()==0){
-            currentlySavedCells= new LinkedList<PathData>();
+    private static void addElementToCurrentlySavedItemList(PathData pathData) {
+        if (currentlySavedCells.size() == 0) {
+            currentlySavedCells = new LinkedList<PathData>();
             currentlySavedCells.add(pathData);
             return;
         }
-        int i=0;
-        for(PathData savedData: currentlySavedCells){
-            if (savedData.dropoff_datetime()>pathData.dropoff_datetime()){
+        int i = 0;
+        for (PathData savedData : currentlySavedCells) {
+            if (savedData.dropoff_datetime() > pathData.dropoff_datetime()) {
                 break;
             }
-            i+=1;
+            i += 1;
         }
-        currentlySavedCells.add(i,pathData);
+        currentlySavedCells.add(i, pathData);
     }
 
     public static void add(PathData pathData) {
@@ -78,7 +79,7 @@ public class PathDataStore {
                     pathData.pickup_latitude(),
                     pathData.dropoff_longitude(),
                     pathData.dropoff_latitude());
-            if(route.isInsideGrid()) {
+            if (route.isInsideGrid()) {
                 addElementToCurrentlySavedItemList(pathData);
                 addRoute(route);
             }
@@ -86,54 +87,37 @@ public class PathDataStore {
     }
 
     private static void addRoute(Route route) {
-        if(usedCells.containsKey(route)){
-            int frequency = usedCells.get(route);
+        int frequency=0;
+        for(Route r:usedCells){
+            if(r.equals(route)){
+                frequency=r.getFrequency();
+                break;
+            }
+        }
+        if(frequency!=0){
             usedCells.remove(route);
-            usedCells.put(route,frequency+1);
-        }else {
-            usedCells.put(route,1);
         }
+        route.setFrequency(frequency + 1);
+        usedCells.add(route);
     }
-    public static Route[] getMostUsedRoute(){
 
-        System.out.println("Correct Routes: "+usedCells.keySet().size());
-        for(Route route : usedCells.keySet()){
-            int frequency=usedCells.get(route).intValue();
-            TenRoutes.tryAddRoute(route,frequency);
-        }
-
-        return TenRoutes.getRoutes();
-    }
-    public static int[] frequencies(){
-        return TenRoutes.frequencies;
-    }
-    private class TenRoutes{
-
-
-        private static int[] frequencies = new int[10];
-        private static Route[] routes= new Route[10];
-
-        public static void tryAddRoute(Route route,int frequency){
-            int minFrequency= frequencies[0];
-            for(int i = 1; i<10;i++){
-                if(frequencies[i]<minFrequency){
-                    minFrequency= frequencies[i];
-                }
+    public static Route[] getMostUsedRoute() {
+        Route[] result = new Route[10];
+        int i = 0;
+        for (Route route : usedCells) {
+            if (i < 10) {
+                result[i] = route;
+                ++i;
             }
-            for(int i = 0; i<10;i++){
-                if(frequencies[i]<frequency && frequencies[i]==minFrequency){
-                    frequencies[i]=frequency;
-                    routes[i]=route;
-                    break;
-                }
+            else {
+                break;
             }
         }
-        public static int[] getFrequencies() {
-            return frequencies;
+        while (i < 10) {
+            result[i] = null;
+            ++i;
         }
-        public static Route[] getRoutes() {
-            return routes;
-        }
+        return result;
     }
 }
 

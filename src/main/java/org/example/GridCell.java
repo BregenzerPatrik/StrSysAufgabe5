@@ -32,7 +32,7 @@ public class GridCell implements Comparable<GridCell>{
 
     @Override
     public String toString() {
-        return "("+longitudeIndex+"/"+latitudeIndex+")";
+        return "("+longitudeIndex+"|"+latitudeIndex+")";
     }
 
     @Override
